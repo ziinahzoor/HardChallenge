@@ -31,17 +31,17 @@ namespace SmartVault.DataGeneration
                 var randomDayIterator = GenerateRandomDay().GetEnumerator();
                 randomDayIterator.MoveNext();
 
-                var userParameters = new Dictionary<string, object>() { { "@Id", i }, { "@FirstName", $"FName{i}" }, { "@LastName", $"LName{i}" }, { "@DateOfBirth", $"{randomDayIterator.Current:yyyy-MM-dd}" }, { "@AccountId", i }, { "@Username", $"UserName-{i}" }, { "@Password", "e10adc3949ba59abbe56e057f20f883e" } };
+                var userParameters = new Dictionary<string, object>() { { "@Id", i }, { "@FirstName", $"FName{i}" }, { "@LastName", $"LName{i}" }, { "@DateOfBirth", $"{randomDayIterator.Current:yyyy-MM-dd}" }, { "@AccountId", i }, { "@Username", $"UserName-{i}" }, { "@Password", "e10adc3949ba59abbe56e057f20f883e" }, { "@CreatedOn", $"{DateTime.Now:yyyy-MM-dd:HH:mm:ss}" } };
                 SetParameters(userInsertCommand, userParameters);
                 userInsertCommand.ExecuteNonQuery();
 
-                var accountParameters = new Dictionary<string, object>() { { "@Id", i }, { "@Name", $"Account{i}" } };
+                var accountParameters = new Dictionary<string, object>() { { "@Id", i }, { "@Name", $"Account{i}" }, { "@CreatedOn", $"{DateTime.Now:yyyy-MM-dd:HH:mm:ss}" } };
                 SetParameters(accountInsertCommand, accountParameters);
                 accountInsertCommand.ExecuteNonQuery();
 
                 for (int d = 0; d < _numberOfDocuments; d++, documentNumber++)
                 {
-                    var documentParameters = new Dictionary<string, object>() { { "@Id", documentNumber }, { "@Name", $"Document{i}-{d}.txt" }, { "@FilePath", $"{documentInfo.FullName}" }, { "@Length", documentInfo.Length }, { "@AccountId", i } };
+                    var documentParameters = new Dictionary<string, object>() { { "@Id", documentNumber }, { "@Name", $"Document{i}-{d}.txt" }, { "@FilePath", $"{documentInfo.FullName}" }, { "@Length", documentInfo.Length }, { "@AccountId", i }, { "@CreatedOn", $"{DateTime.Now:yyyy-MM-dd:HH:mm:ss}" } };
                     SetParameters(documentInsertCommand, documentParameters);
                     documentInsertCommand.ExecuteNonQuery();
                 }
@@ -54,8 +54,8 @@ namespace SmartVault.DataGeneration
         {
             var userInsertCommand = connection.CreateCommand();
             userInsertCommand.CommandText =
-                "INSERT INTO User (Id, FirstName, LastName, DateOfBirth, AccountId, Username, Password)" +
-                "VALUES(@Id, @FirstName, @LastName, @DateOfBirth, @AccountId, @Username, @Password)";
+                "INSERT INTO User (Id, FirstName, LastName, DateOfBirth, AccountId, Username, Password, CreatedOn)" +
+                "VALUES(@Id, @FirstName, @LastName, @DateOfBirth, @AccountId, @Username, @Password, @CreatedOn)";
 
             userInsertCommand.Parameters.Add(new("@Id", System.Data.DbType.Int32));
             userInsertCommand.Parameters.Add(new("@FirstName", System.Data.DbType.String));
@@ -64,6 +64,7 @@ namespace SmartVault.DataGeneration
             userInsertCommand.Parameters.Add(new("@AccountId", System.Data.DbType.Int32));
             userInsertCommand.Parameters.Add(new("@Username", System.Data.DbType.String));
             userInsertCommand.Parameters.Add(new("@Password", System.Data.DbType.String));
+            userInsertCommand.Parameters.Add(new("@CreatedOn", System.Data.DbType.String));
 
             return userInsertCommand;
         }
@@ -72,11 +73,12 @@ namespace SmartVault.DataGeneration
         {
             var accountInsertCommand = connection.CreateCommand();
             accountInsertCommand.CommandText =
-                "INSERT INTO Account (Id, Name)" +
-                "VALUES(@Id, @Name)";
+                "INSERT INTO Account (Id, Name, CreatedOn)" +
+                "VALUES(@Id, @Name, @CreatedOn)";
 
             accountInsertCommand.Parameters.Add(new("@Id", System.Data.DbType.Int32));
             accountInsertCommand.Parameters.Add(new("@Name", System.Data.DbType.String));
+            accountInsertCommand.Parameters.Add(new("@CreatedOn", System.Data.DbType.String));
 
             return accountInsertCommand;
         }
@@ -85,14 +87,15 @@ namespace SmartVault.DataGeneration
         {
             var documentInsertCommand = connection.CreateCommand();
             documentInsertCommand.CommandText =
-                "INSERT INTO Document (Id, Name, FilePath, Length, AccountId)" +
-                "VALUES(@Id, @Name, @FilePath, @Length, @AccountId)";
+                "INSERT INTO Document (Id, Name, FilePath, Length, AccountId, CreatedOn)" +
+                "VALUES(@Id, @Name, @FilePath, @Length, @AccountId, @CreatedOn)";
 
             documentInsertCommand.Parameters.Add(new("@Id", System.Data.DbType.Int32));
             documentInsertCommand.Parameters.Add(new("@Name", System.Data.DbType.String));
             documentInsertCommand.Parameters.Add(new("@FilePath", System.Data.DbType.String));
             documentInsertCommand.Parameters.Add(new("@Length", System.Data.DbType.Int32));
             documentInsertCommand.Parameters.Add(new("@AccountId", System.Data.DbType.Int32));
+            documentInsertCommand.Parameters.Add(new("@CreatedOn", System.Data.DbType.String));
 
             return documentInsertCommand;
         }
