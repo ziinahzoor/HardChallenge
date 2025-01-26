@@ -13,12 +13,12 @@ namespace SmartVault.DataGeneration
     internal partial class Program
     {
         static bool _isTest = false;
-        static int _numberOfUsers = 10;
+        static int _numberOfUsers = 100;
         static int _numberOfDocuments = 10000;
 
         internal static void Main(string[] args)
         {
-            if (args[0] == "test")
+            if (args.Any() && args[0] == "test")
             {
                 _isTest = true;
                 _numberOfUsers = 1;
