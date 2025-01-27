@@ -52,7 +52,7 @@ namespace SmartVault.Program
         private static void WriteEveryThirdFileToFile(string accountId)
         {
             _documentService.CreateAccountDocument(accountId);
-            Console.WriteLine($"File created with name: Account{accountId}File.txt");
+            Console.WriteLine($"File created with name: Account{accountId}Document.txt");
         }
     }
 }
