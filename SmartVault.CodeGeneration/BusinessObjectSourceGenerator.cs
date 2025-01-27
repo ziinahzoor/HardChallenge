@@ -3,6 +3,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System;
 using SmartVault.Library;
+using System.Diagnostics;
 
 namespace SmartVault.CodeGeneration
 {
@@ -12,23 +13,22 @@ namespace SmartVault.CodeGeneration
         public void Execute(GeneratorExecutionContext context)
         {
             // Find the main method
-            var mainMethod = context.Compilation.GetEntryPoint(context.CancellationToken);
+            IMethodSymbol? mainMethod = context.Compilation.GetEntryPoint(context.CancellationToken);
 
             // Build up the source code
-            for (int i = 0; i < 3; i++)
+            foreach (AdditionalText file in context.AdditionalFiles)
             {
-                var file = context.AdditionalFiles[i];
-                var fileContents = file.GetText().ToString();
+                string fileContents = file.GetText().ToString();
 
-                var serializer = new XmlSerializer(typeof(BusinessObject));
-                using var reader = new StringReader(fileContents);
-                var name = Path.GetFileNameWithoutExtension(file.Path);
-                var businessObjectModel = (BusinessObject)serializer.Deserialize(reader);
+                XmlSerializer serializer = new(typeof(BusinessObject));
+                using StringReader reader = new(fileContents);
+                string name = Path.GetFileNameWithoutExtension(file.Path);
+                BusinessObject businessObjectModel = (BusinessObject)serializer.Deserialize(reader);
 
                 string propertiesString = "";
                 for (int j = 0; j < businessObjectModel.PropertyGroup.Property.Count; j++)
                 {
-                    var property = businessObjectModel.PropertyGroup.Property[j];
+                    Property property = businessObjectModel.PropertyGroup.Property[j];
                     propertiesString += string.Format("        public {0} {1} {{ get; set; }}{2}", property.Type, property.Name, Environment.NewLine);
                 }
 
@@ -42,8 +42,6 @@ namespace {mainMethod.ContainingNamespace.ToDisplayString()}.BusinessObjects
 }}
 ";
                 context.AddSource($"{name}.generated.cs", businessObjectClassString);
-
-
             }
         }
 
