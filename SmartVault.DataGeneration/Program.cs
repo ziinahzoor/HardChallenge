@@ -22,6 +22,7 @@ namespace SmartVault.DataGeneration
 
         static readonly ISeedingService _seedingService;
         static readonly IUserService _userService;
+        static readonly IOAuthUserService _OAuthUserService;
         static readonly IAccountService _accountService;
         static readonly IDocumentService _documentService;
 
@@ -36,17 +37,20 @@ namespace SmartVault.DataGeneration
                 .AddSingleton<IConfiguration>(configuration)
                 .AddSingleton<ISeedingService, SeedingService>()
                 .AddSingleton<IUserService, UserService>()
+                .AddSingleton<IOAuthUserService, OAuthUserService>()
                 .AddSingleton<IAccountService, AccountService>()
                 .AddSingleton<IDocumentService, DocumentService>()
                 .AddSingleton<IDatabaseManager, DatabaseManager>()
                 .AddSingleton<ISeedingRepository, SeedingRepository>()
                 .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<IOAuthUserRepository, OAuthUserRepository>()
                 .AddSingleton<IAccountRepository, AccountRepository>()
                 .AddSingleton<IDocumentRepository, DocumentRepository>()
                 .BuildServiceProvider();
 
             _seedingService = serviceProvider.GetRequiredService<ISeedingService>();
             _userService = serviceProvider.GetRequiredService<IUserService>();
+            _OAuthUserService = serviceProvider.GetRequiredService<IOAuthUserService>();
             _accountService = serviceProvider.GetRequiredService<IAccountService>();
             _documentService = serviceProvider.GetRequiredService<IDocumentService>();
         }
@@ -82,9 +86,11 @@ namespace SmartVault.DataGeneration
             int accountCount = _accountService.GetCount();
             int documentCount = _documentService.GetCount();
             int userCount = _userService.GetCount();
+            int OAuthUserCount = _OAuthUserService.GetCount();
             Console.WriteLine($"AccountCount: { accountCount }");
             Console.WriteLine($"DocumentCount: { documentCount }");
             Console.WriteLine($"UserCount: { userCount }");
+            Console.WriteLine($"OAuthUserCount: { OAuthUserCount }");
         }
     }
 }

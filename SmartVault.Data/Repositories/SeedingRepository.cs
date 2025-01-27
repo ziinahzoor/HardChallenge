@@ -14,16 +14,19 @@ namespace SmartVault.Data.Repositories
     {
         private readonly IDatabaseManager _databaseManager;
         private readonly IUserRepository _userRepository;
+        private readonly IOAuthUserRepository _OAuthUserRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IDocumentRepository _documentRepository;
 
         public SeedingRepository(IDatabaseManager databaseManager,
                                  IUserRepository userRepository,
+                                 IOAuthUserRepository OAuthUserRepository,
                                  IAccountRepository accountRepository,
                                  IDocumentRepository documentRepository)
         {
             _databaseManager = databaseManager;
             _userRepository = userRepository;
+            _OAuthUserRepository = OAuthUserRepository;
             _accountRepository = accountRepository;
             _documentRepository = documentRepository;
         }
@@ -42,6 +45,7 @@ namespace SmartVault.Data.Repositories
             ImproveOperationPerformance(connection);
 
             using SQLiteCommand userInsertCommand = _userRepository.CreateInsertCommand(connection);
+            using SQLiteCommand OAuthUserInsertCommand = _OAuthUserRepository.CreateInsertCommand(connection);
             using SQLiteCommand accountInsertCommand = _accountRepository.CreateInsertCommand(connection);
             using SQLiteCommand documentInsertCommand = _documentRepository.CreateInsertCommand(connection);
 
@@ -51,11 +55,15 @@ namespace SmartVault.Data.Repositories
             {
                 using SQLiteTransaction transaction = connection.BeginTransaction();
                 userInsertCommand.Transaction = transaction;
+                OAuthUserInsertCommand.Transaction = transaction;
                 accountInsertCommand.Transaction = transaction;
                 documentInsertCommand.Transaction = transaction;
 
                 IDictionary<string, object> userParameters = CreateUserParameters(index);
                 _userRepository.Insert(userInsertCommand, userParameters);
+
+                IDictionary<string, object> OAuthUserParameters = CreateOAuthUserParameters(index);
+                _OAuthUserRepository.Insert(OAuthUserInsertCommand, OAuthUserParameters);
 
                 IDictionary<string, object> accountParameters = CreateAccountParameters(index);
                 _accountRepository.Insert(accountInsertCommand, accountParameters);
@@ -102,6 +110,24 @@ namespace SmartVault.Data.Repositories
                 { "@AccountId", index },
                 { "@Username", $"UserName-{index}" },
                 { "@Password", "e10adc3949ba59abbe56e057f20f883e" },
+                { "@CreatedOn", $"{DateTime.Now:yyyy-MM-dd:HH:mm:ss}" }
+            };
+
+            return userParameters;
+        }
+
+        private static IDictionary<string, object> CreateOAuthUserParameters(int index)
+        {
+
+            Dictionary<string, object> userParameters = new()
+            {
+                { "@Id", index },
+                { "@LocalId", index },
+                { "@EmailAddress", $"user{index}@smartvault.com" },
+                { "@AccessToken", "e10adc3949ba59abbe56e057f20f883e" },
+                { "@RefreshToken", "e10adc3949ba59abbe56e057f20f883e" },
+                { "@TokenExpiration", $"{DateTime.Now.AddDays(1):yyyy-MM-dd:HH:mm:ss}" },
+                { "@Provider", "OAuth Provider" },
                 { "@CreatedOn", $"{DateTime.Now:yyyy-MM-dd:HH:mm:ss}" }
             };
 
