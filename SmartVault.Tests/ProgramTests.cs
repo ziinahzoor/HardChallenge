@@ -6,16 +6,13 @@ using SmartVault.Data.Interfaces;
 using SmartVault.Data.Repositories.Interfaces;
 using SmartVault.Data.Repositories;
 using SmartVault.Data;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
+using System.Collections.Generic;
 
 namespace SmartVault.Tests
 {
+    [Collection("DatabaseAccessRequirement")]
     public class ProgramTests
     {
         private readonly ServiceProvider _serviceProvider;
@@ -46,10 +43,38 @@ namespace SmartVault.Tests
             long fileSize = new FileInfo("TestDoc.txt").Length;
 
             //Act
-            long totalFileSize = documentService.GetAllFileSizes();
+            long totalFileSize = documentService.GetAllDocumentSizes();
 
             //Assert
-            Assert.Equal(fileSize * 2, totalFileSize);
+            Assert.Equal(fileSize * 6, totalFileSize);
+        }
+
+        [Fact]
+        public void ItShouldGenerateADocumentWithAllThirdDocuments()
+        {
+            //Arrange
+            string[] args = { "test" };
+            DataGeneration.Program.Main(args);
+            IDocumentService documentService = _serviceProvider.GetService<IDocumentService>();
+            IEnumerable<string> allThirdDocuments = documentService.GetAccountAllThirdDocumentsPaths("0");
+            int totalCharacters = 0;
+            int newFileCharacterSpacing = 4;
+
+            foreach(var document in allThirdDocuments)
+            {
+                string documentContent = File.ReadAllText(document);
+                if (documentContent.Contains("Smith Property"))
+                {
+                    totalCharacters += documentContent.Length + newFileCharacterSpacing;
+                }
+            }
+
+            //Act
+            documentService.CreateAccountDocument("0");
+            string finalDocument = File.ReadAllText("Account0Document.txt");
+
+            //Assert
+            Assert.Equal(finalDocument.Length, totalCharacters);
         }
     }
 }

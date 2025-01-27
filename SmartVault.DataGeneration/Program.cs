@@ -57,7 +57,7 @@ namespace SmartVault.DataGeneration
             {
                 _isTest = true;
                 _numberOfUsers = 1;
-                _numberOfDocuments = 2;
+                _numberOfDocuments = 6;
             }
 
             SeedDatabase();

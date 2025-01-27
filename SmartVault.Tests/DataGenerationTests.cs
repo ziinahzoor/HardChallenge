@@ -11,6 +11,7 @@ using SmartVault.Data;
 
 namespace SmartVault.Tests
 {
+    [Collection("DatabaseAccessRequirement")]
     public class DataGenerationTests
     {
         private readonly ServiceProvider _serviceProvider;
@@ -54,7 +55,7 @@ namespace SmartVault.Tests
             //Assert
             Assert.Equal(1, userCount);
             Assert.Equal(1, accountCount);
-            Assert.Equal(2, documentCount);
+            Assert.Equal(6, documentCount);
         }
     }
 }

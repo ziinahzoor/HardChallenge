@@ -18,7 +18,7 @@ namespace SmartVault.Business.Services
 
         public int GetCount() => _documentRepository.GetCount();
 
-        public long GetAllFileSizes()
+        public long GetAllDocumentSizes()
         {
             IEnumerable<string> documentPaths = _documentRepository.GetAllDocumentsPaths();
             IEnumerable<long> fileLengths = documentPaths.Select(d => new FileInfo(d).Length);
@@ -26,6 +26,29 @@ namespace SmartVault.Business.Services
             return totalLength;
         }
 
+        public IEnumerable<string> GetAccountAllThirdDocumentsPaths(string accountId)
+        {
+            IEnumerable<string> documentPaths = _documentRepository.GetAllDocumentsPaths(accountId);
+            IEnumerable<string> thirdDocuments = documentPaths.Where((_, index) => (index + 1) % 3 == 0);
+            return thirdDocuments;
+        }
+
+        public void CreateAccountDocument(string accountId)
+        {
+            IEnumerable<string> thirdDocuments = GetAccountAllThirdDocumentsPaths(accountId);
+
+            using var outputStream = new StreamWriter($"Account{accountId}Document.txt");
+
+            foreach (var document in thirdDocuments)
+            {
+                var documentContent = File.ReadAllText(document);
+                if (documentContent.Contains("Smith Property"))
+                {
+                    outputStream.WriteLine(documentContent);
+                    outputStream.WriteLine();
+                }
+            }
+        }
 
         public void CreateDocument(string fullPath)
         {

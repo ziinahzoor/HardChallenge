@@ -46,5 +46,12 @@ namespace SmartVault.Data.Repositories
             IEnumerable<string> documentPaths = connection.Query<string>("SELECT FilePath FROM Document;");
             return documentPaths;
         }
+
+        public IEnumerable<string> GetAllDocumentsPaths(string accountId)
+        {
+            using SQLiteConnection connection = _databaseManager.CreateConnection();
+            IEnumerable<string> documentPaths = connection.Query<string>(string.Format("SELECT FilePath FROM Document WHERE AccountId = {0};", accountId));
+            return documentPaths;
+        }
     }
 }
