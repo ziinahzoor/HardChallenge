@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using SmartVault.Data.Interfaces;
 using SmartVault.Data.Repositories.Interfaces;
+using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 
@@ -37,6 +38,13 @@ namespace SmartVault.Data.Repositories
             using SQLiteConnection connection = _databaseManager.CreateConnection();
             int count = connection.Query<int>("SELECT COUNT(*) FROM Document;").FirstOrDefault();
             return count;
+        }
+
+        public IEnumerable<string> GetAllDocumentsPaths()
+        {
+            using SQLiteConnection connection = _databaseManager.CreateConnection();
+            IEnumerable<string> documentPaths = connection.Query<string>("SELECT FilePath FROM Document;");
+            return documentPaths;
         }
     }
 }

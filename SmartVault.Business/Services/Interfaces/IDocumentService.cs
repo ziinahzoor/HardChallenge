@@ -3,5 +3,7 @@
     public interface IDocumentService : IBusinessObjectService
     {
         public void CreateDocument(string fullPath);
+
+        public long GetAllFileSizes();
     }
 }
