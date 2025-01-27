@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartVault.DataGeneration",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartVault.Tests", "SmartVault.Tests\SmartVault.Tests.csproj", "{555AE1B4-67E6-46F3-A2BA-16215FD869B7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartVault.Business", "SmartVault.Business\SmartVault.Business.csproj", "{FEA26F5A-1472-4E12-AECF-03C8BE263E12}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartVault.Data", "SmartVault.Data\SmartVault.Data.csproj", "{8108C650-F4EE-4E9E-BEE6-529A1E65250D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{555AE1B4-67E6-46F3-A2BA-16215FD869B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{555AE1B4-67E6-46F3-A2BA-16215FD869B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{555AE1B4-67E6-46F3-A2BA-16215FD869B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FEA26F5A-1472-4E12-AECF-03C8BE263E12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FEA26F5A-1472-4E12-AECF-03C8BE263E12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FEA26F5A-1472-4E12-AECF-03C8BE263E12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FEA26F5A-1472-4E12-AECF-03C8BE263E12}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8108C650-F4EE-4E9E-BEE6-529A1E65250D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8108C650-F4EE-4E9E-BEE6-529A1E65250D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8108C650-F4EE-4E9E-BEE6-529A1E65250D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8108C650-F4EE-4E9E-BEE6-529A1E65250D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

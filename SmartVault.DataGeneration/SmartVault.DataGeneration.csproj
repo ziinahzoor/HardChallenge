@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SmartVault.CodeGeneration\SmartVault.CodeGeneration.csproj" />
+    <ProjectReference Include="..\SmartVault.Business\SmartVault.Business.csproj" />
   </ItemGroup>
 
 </Project>

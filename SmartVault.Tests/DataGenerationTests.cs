@@ -1,35 +1,55 @@
-using Dapper;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Newtonsoft.Json;
-using System;
-using System.Data.SQLite;
+using Microsoft.Extensions.DependencyInjection;
+using SmartVault.Business.Services.Interfaces;
+using SmartVault.Business.Services;
+using SmartVault.Data.Repositories.Interfaces;
+using SmartVault.Data.Repositories;
 using System.IO;
 using Xunit;
+using SmartVault.Data.Interfaces;
+using SmartVault.Data;
 
 namespace SmartVault.Tests
 {
     public class DataGenerationTests
     {
-        [Fact]
-        public void ItShouldCreateTestDatabase()
+        private readonly ServiceProvider _serviceProvider;
+
+        public DataGenerationTests()
         {
-            //Arrange
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            string databaseFileName = configuration["DatabaseFileName"] ?? "";
-            string connectionString = string.Format(configuration["ConnectionStrings:DefaultConnection"] ?? "", databaseFileName);
-            using var connection = new SQLiteConnection(connectionString);
+            _serviceProvider = new ServiceCollection()
+                .AddSingleton<IConfiguration>(configuration)
+                .AddSingleton<ISeedingService, SeedingService>()
+                .AddSingleton<IUserService, UserService>()
+                .AddSingleton<IAccountService, AccountService>()
+                .AddSingleton<IDocumentService, DocumentService>()
+                .AddSingleton<IDatabaseManager, DatabaseManager>()
+                .AddSingleton<ISeedingRepository, SeedingRepository>()
+                .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<IAccountRepository, AccountRepository>()
+                .AddSingleton<IDocumentRepository, DocumentRepository>()
+                .BuildServiceProvider();
+        }
+
+        [Fact]
+        public void ItShouldCreateTestDatabase()
+        {
+            //Arrange
+            string[] args = { "test" };
+            IUserService userService = _serviceProvider.GetService<IUserService>();
+            IAccountService accountService = _serviceProvider.GetService<IAccountService>();
+            IDocumentService documentService = _serviceProvider.GetService<IDocumentService>();
 
             //Act
-            string[] args = { "test" };
             DataGeneration.Program.Main(args);
-            var userCount = connection.QueryFirst<int>("SELECT COUNT(*) FROM User;");
-            var accountCount = connection.QueryFirst<int>("SELECT COUNT(*) FROM Account;");
-            var documentCount = connection.QueryFirst<int>("SELECT COUNT(*) FROM Document;");
+            int userCount = userService.GetCount();
+            int accountCount = accountService.GetCount();
+            int documentCount = documentService.GetCount();
 
             //Assert
             Assert.Equal(1, userCount);

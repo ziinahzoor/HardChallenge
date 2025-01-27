@@ -1,8 +1,12 @@
-﻿using Dapper;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using SmartVault.Business.Services;
+using SmartVault.Business.Services.Interfaces;
+using SmartVault.Data;
+using SmartVault.Data.Interfaces;
+using SmartVault.Data.Repositories;
+using SmartVault.Data.Repositories.Interfaces;
 using System;
-using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -16,6 +20,37 @@ namespace SmartVault.DataGeneration
         static int _numberOfUsers = 100;
         static int _numberOfDocuments = 10000;
 
+        static readonly ISeedingService _seedingService;
+        static readonly IUserService _userService;
+        static readonly IAccountService _accountService;
+        static readonly IDocumentService _documentService;
+
+        static Program()
+        {
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            ServiceProvider serviceProvider = new ServiceCollection()
+                .AddSingleton<IConfiguration>(configuration)
+                .AddSingleton<ISeedingService, SeedingService>()
+                .AddSingleton<IUserService, UserService>()
+                .AddSingleton<IAccountService, AccountService>()
+                .AddSingleton<IDocumentService, DocumentService>()
+                .AddSingleton<IDatabaseManager, DatabaseManager>()
+                .AddSingleton<ISeedingRepository, SeedingRepository>()
+                .AddSingleton<IUserRepository, UserRepository>()
+                .AddSingleton<IAccountRepository, AccountRepository>()
+                .AddSingleton<IDocumentRepository, DocumentRepository>()
+                .BuildServiceProvider();
+
+            _seedingService = serviceProvider.GetRequiredService<ISeedingService>();
+            _userService = serviceProvider.GetRequiredService<IUserService>();
+            _accountService = serviceProvider.GetRequiredService<IAccountService>();
+            _documentService = serviceProvider.GetRequiredService<IDocumentService>();
+        }
+
         internal static void Main(string[] args)
         {
             if (args.Any() && args[0] == "test")
@@ -25,55 +60,31 @@ namespace SmartVault.DataGeneration
                 _numberOfDocuments = 2;
             }
 
-            GenerateDatabase();
+            SeedDatabase();
+
+            if (!_isTest)
+            {
+                OutputInsertionStatistics();
+            }
         }
 
-        static void GenerateDatabase()
+        static void SeedDatabase()
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            string databaseFileName = configuration["DatabaseFileName"] ?? "";
-
-            if (File.Exists(databaseFileName))
-            {
-                File.Delete(databaseFileName);
-            }
-
-            SQLiteConnection.CreateFile(databaseFileName);
-
             string documentPath = Path.Combine(Directory.GetCurrentDirectory(), "TestDoc.txt");
-            File.WriteAllText(documentPath, GenerateTestText());
+            _documentService.CreateDocument(documentPath);
 
-            string connectionString = string.Format(configuration["ConnectionStrings:DefaultConnection"] ?? "", databaseFileName);
-            using var connection = new SQLiteConnection(connectionString);
-            connection.Open();
-
-            GenerateTables(connection);
-            PopulateDatabase(connection, documentPath);
-
-            if (_isTest)
-            {
-                OutputInsertionStatistics(connection);
-            }
+            _seedingService.CreateDatabase();
+            _seedingService.SeedDatabase(_numberOfUsers, _numberOfDocuments, documentPath);
         }
 
-        static string GenerateTestText()
+        static void OutputInsertionStatistics()
         {
-            const int numberOfLines = 100;
-            return string.Join(Environment.NewLine, new string[numberOfLines].Select(_ => "This is my test document"));
-        }
-
-        static void OutputInsertionStatistics(SQLiteConnection connection)
-        {
-            var accountData = connection.Query("SELECT COUNT(*) FROM Account;");
-            Console.WriteLine($"AccountCount: {JsonConvert.SerializeObject(accountData)}");
-            var documentData = connection.Query("SELECT COUNT(*) FROM Document;");
-            Console.WriteLine($"DocumentCount: {JsonConvert.SerializeObject(documentData)}");
-            var userData = connection.Query("SELECT COUNT(*) FROM User;");
-            Console.WriteLine($"UserCount: {JsonConvert.SerializeObject(userData)}");
+            int accountCount = _accountService.GetCount();
+            int documentCount = _documentService.GetCount();
+            int userCount = _userService.GetCount();
+            Console.WriteLine($"AccountCount: { accountCount }");
+            Console.WriteLine($"DocumentCount: { documentCount }");
+            Console.WriteLine($"UserCount: { userCount }");
         }
     }
 }
